@@ -6,7 +6,7 @@
 import scrapy
 
 
-class SrealityCrawlerItem(scrapy.Item):
+class SrealityFlatItem(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    title = scrapy.Field()
+    image_url = scrapy.Field()

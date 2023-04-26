@@ -1,39 +1,37 @@
-# Connect to database and scrape data from sreality.cz
-#import psycopg2
-#
-#con = psycopg2.connect(
-#database="devdb",
-#user="devuser",
-#password="devpass",
-#host="db",
-#port= '5432'
-#)
-#
-#
-#cur = con.cursor()
-#result = cur.execute("SELECT REPEAT('Hello', 5)")
-#print("Result", result)
-
 import scrapy
+from sreality_crawler.items import SrealityFlatItem
+from scrapy.exceptions import CloseSpider
 
 class SrealityFlatsSpider(scrapy.Spider):
+    handle_httpstatus_list = [403, 404]
     name = "sreality_flats"
+    allowed_domains  = ['sreality.cz']
+    counter = 0
+    max_number_of_items = 500
     start_urls = [
-        'https://www.sreality.cz/en/search/for-sale/apartments',
+        'https://www.sreality.cz/en/search/for-sale/apartments?_escaped_fragment_=',
     ]
 
+    custom_settings = {
+    'LOG_LEVEL': 'DEBUG'
+    }
     def parse(self, response):
-        # class= "dir-property-list"
-        #class="_2xzMRvpz7TDA2twKCXTS4R"
-        # first a tag
-        # img tag inside a tag
+        sreality_flat_item = SrealityFlatItem()
+        for property in response.css('div.dir-property-list > div.property'):
+            image_url = property.css("div._2xzMRvpz7TDA2twKCXTS4R > a > img::attr(src)").get()
+            print("Image", image_url)
+            title = property.css("div.text-wrap > span.basic > h2 > a > span.name::text").get()
+            print("Title", title)
+            sreality_flat_item['title'] = title
+            sreality_flat_item['image_url'] = image_url
 
-        # element after class="_2xzMRvpz7TDA2twKCXTS4R"
-        # div class="text-wrap"
-        # inside span
-        # h2>a>span>text
-        #span
-        #span
+            yield sreality_flat_item
+            self.counter += 1
+            if self.counter >= self.max_number_of_items:
+                raise CloseSpider('Processed 500 items')
 
-        page = response.url.split("/")[-2]
-        filename = f'quotes-{page}.html'
+        next_page = response.css("div.paging > ul.paging-full > li:last-child > a::attr(href)").get()
+        next_page += "&_escaped_fragment_="
+        print("Next page", next_page)
+        if next_page:
+            yield response.follow(next_page, callback=self.parse)

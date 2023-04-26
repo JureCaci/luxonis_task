@@ -9,7 +9,7 @@ services:
     volumes:
       - ./app:/app
     command:
-      sh -c "python scrape_sreality_flats.py &&
+      sh -c "python ./sreality_crawler/sreality_crawler_process.py &&
             python server.py"
     environment:
       - DB_HOST=db
