@@ -1,1 +1,11 @@
-# luxonis_task
+# Luxonis task # 
+Creating a HTTPServer for displaying first 500 flats from https://www.sreality.cz/
+
+- Clone repository
+- Run docker compose yaml
+```
+docker-compose up -d
+```
+- Wait for around 30 s
+- Visit page
+http://127.0.0.1:8080/
