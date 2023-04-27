@@ -10,6 +10,6 @@ cd luxonis_task
 ```
 docker-compose up -d
 ```
-- Wait for around 30 s
+- Wait for around 1 min
 - Visit page
 http://127.0.0.1:8080/
