@@ -9,8 +9,11 @@ services:
     volumes:
       - ./app:/app
     command:
-      sh -c "python ./sreality_crawler/sreality_crawler_process.py &&
+      sh -c "python create_srealty_flats_table.py &&
+            python ./sreality_crawler/sreality_crawler_process.py &&
             python server.py"
+
+
     environment:
       - DB_HOST=db
       - DB_NAME=devdb
@@ -24,9 +27,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - database:/var/lib/postgresql/data
+      - postgresql_db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U devuser -d devdb"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -36,4 +39,5 @@ services:
       - POSTGRES_PASSWORD=devpass
 
 volumes:
-  database:
+  postgresql_db:
+    name: postgresql_db

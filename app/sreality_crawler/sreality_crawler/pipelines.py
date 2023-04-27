@@ -9,8 +9,7 @@ from itemadapter import ItemAdapter
 import psycopg2
 
 class SrealityCrawlerPostgresPipeline:
-
-    def __init__(self):
+    def open_spider(self, spider):
         database = "devdb"
         user = "devuser"
         password = "devpass"
@@ -18,19 +17,17 @@ class SrealityCrawlerPostgresPipeline:
         port = '5432'
         self.connection = psycopg2.connect(database=database, user=user, password=password, host=host, port=port)
         self.cur = self.connection.cursor()
-        self.cur.execute("""
-        CREATE TABLE IF NOT EXISTS sreality_flats(
-            id SERIAL PRIMARY KEY,
-            title TEXT,
-            image_url TEXT
-        )
-        """)
 
     def process_item(self, item, spider):
-        self.cur.execute("""
-        INSERT INTO sreality_flats (title, image_url) VALUES (%(title)s, %(image_url)s)
-        """, item)
-        self.connection.commit()
+        try:
+            self.cur.execute("""
+            INSERT INTO sreality_flats (title, image_url) VALUES (%(title)s, %(image_url)s)
+            """, item)
+            self.connection.commit()
+        except:
+            self.connection.rollback()
+            raise
+
         return item
 
     def close_spider(self, spider):
